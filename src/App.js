@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import './App.css';
 
 const bananaUrl = 'https://thumbs.dreamstime.com/b/bunch-bananas-6175887.jpg?w=768';
@@ -24,6 +24,9 @@ function App() {
   const [message, setMessage] = useState('');
   const [showYouDied, setShowYouDied] = useState(false);
 
+  const backgroundMusicRef = useRef(null);
+  const deathSoundRef = useRef(null);
+
   const handleTileClick = (index) => {
     if (gameOver || revealed[index] || !playerChoice) return;
 
@@ -37,9 +40,27 @@ function App() {
       setMessage(`Oops! You clicked a ${clickedItem}. You lose!`);
       setGameOver(true);
       setShowYouDied(true);
+
+      // Play "You Died" sound
+      if (deathSoundRef.current) {
+        deathSoundRef.current.volume = 0.5;
+        deathSoundRef.current.play();
+      }
+
+      // Stop background music
+      if (backgroundMusicRef.current) {
+        backgroundMusicRef.current.pause();
+        backgroundMusicRef.current.currentTime = 0;
+      }
     } else if (newRevealed.every((rev, idx) => !rev || board[idx] !== playerChoice)) {
       setMessage(`Congratulations! You found all the ${playerChoice}s. You win!`);
       setGameOver(true);
+
+      // Stop background music
+      if (backgroundMusicRef.current) {
+        backgroundMusicRef.current.pause();
+        backgroundMusicRef.current.currentTime = 0;
+      }
     }
   };
 
@@ -50,7 +71,28 @@ function App() {
     setMessage('');
     setPlayerChoice(null);
     setShowYouDied(false);
+
+    // Reset sounds
+    if (backgroundMusicRef.current) {
+      backgroundMusicRef.current.pause();
+      backgroundMusicRef.current.currentTime = 0;
+    }
+
+    if (deathSoundRef.current) {
+      deathSoundRef.current.pause();
+      deathSoundRef.current.currentTime = 0;
+    }
   };
+
+  // Play background music when player selects a side
+  useEffect(() => {
+    if (playerChoice && backgroundMusicRef.current) {
+      backgroundMusicRef.current.volume = 0.3;
+      backgroundMusicRef.current.play().catch(err =>
+        console.log('Autoplay blocked:', err)
+      );
+    }
+  }, [playerChoice]);
 
   return (
     <div className="container">
@@ -64,12 +106,21 @@ function App() {
         </div>
       )}
 
-      {playerChoice && <p>You are the <strong>{playerChoice.toUpperCase()} Player</strong>.</p>}
+      {playerChoice && (
+        <p>You are the <strong>{playerChoice.toUpperCase()} Player</strong>.</p>
+      )}
 
       <div className="grid">
         {board.map((item, index) => (
           <div key={index} className="square" onClick={() => handleTileClick(index)}>
-            {revealed[index] ? (<img src={item === 'banana' ? bananaUrl : chickenUrl} alt={item} />) : (<div className="hidden-tile">?</div>)}
+            {revealed[index] ? (
+              <img
+                src={item === 'banana' ? bananaUrl : chickenUrl}
+                alt={item}
+              />
+            ) : (
+              <div className="hidden-tile">?</div>
+            )}
           </div>
         ))}
       </div>
@@ -77,7 +128,7 @@ function App() {
       {message && <h2>{message}</h2>}
       <button onClick={startNewGame}>Restart Game</button>
 
-     {showYouDied && (
+      {showYouDied && (
         <div className="you-died-overlay">
           <div className="you-died-image-wrapper">
             <img src={youDiedUrl} alt="YOU DIED" className="you-died-image" />
@@ -86,6 +137,17 @@ function App() {
         </div>
       )}
 
+      {/* Background Music */}
+      <audio ref={backgroundMusicRef} loop>
+        <source src="/audio/Vordt.MP3" type="audio/mp3" />
+        Your browser does not support the audio element.
+      </audio>
+
+      {/* You Died Sound */}
+      <audio ref={deathSoundRef}>
+        <source src="/audio/you-died.MP3" type="audio/mp3" />
+        Your browser does not support the audio element.
+      </audio>
     </div>
   );
 }
