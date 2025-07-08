@@ -49,13 +49,11 @@ function App() {
       setGameOver(true);
       setShowYouDied(true);
 
-      // Play "You Died" sound
       if (deathSoundRef.current) {
         deathSoundRef.current.volume = 0.5;
         deathSoundRef.current.play();
       }
 
-      // Stop background music
       if (backgroundMusicRef.current) {
         backgroundMusicRef.current.pause();
         backgroundMusicRef.current.currentTime = 0;
@@ -64,7 +62,6 @@ function App() {
       setMessage(`Congratulations! You found all the ${playerChoice}s. You win!`);
       setGameOver(true);
 
-      // Stop background music
       if (backgroundMusicRef.current) {
         backgroundMusicRef.current.pause();
         backgroundMusicRef.current.currentTime = 0;
@@ -80,7 +77,6 @@ function App() {
     setPlayerChoice(null);
     setShowYouDied(false);
 
-    // Reset sounds
     if (backgroundMusicRef.current) {
       backgroundMusicRef.current.pause();
       backgroundMusicRef.current.currentTime = 0;
@@ -92,7 +88,6 @@ function App() {
     }
   };
 
-  // Play background music when player selects a side
   useEffect(() => {
     if (playerChoice && backgroundMusicRef.current) {
       backgroundMusicRef.current.volume = 0.3;
