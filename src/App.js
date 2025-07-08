@@ -11,14 +11,22 @@ const TOTAL_TILES = GRID_SIZE * GRID_SIZE;
 function getRandomBoard() {
   const board = [];
   for (let i = 0; i < TOTAL_TILES; i++) {
-    board.push(Math.random() < 0.5 ? 'banana' : 'chicken');
+    if (board.filter(item => item === 'banana').length === TOTAL_TILES/2){
+      board.push('chicken');
+    } 
+    else if (board.filter(item => item === 'chicken').length === TOTAL_TILES/2){
+      board.push('banana');
+    }
+    else {
+      board.push(Math.random() < 0.5 ? 'banana' : 'chicken');
+    }
   }
   return board;
 }
 
 function App() {
   const [board, setBoard] = useState(getRandomBoard);
-  const [revealed, setRevealed] = useState(Array(TOTAL_TILES).fill(false));
+  const [revealed, setRevealed] = useState(Array(TOTAL_TILES).fill(false));//Change to true to reveal the box
   const [playerChoice, setPlayerChoice] = useState(null); 
   const [gameOver, setGameOver] = useState(false);
   const [message, setMessage] = useState('');
@@ -119,7 +127,7 @@ function App() {
                 alt={item}
               />
             ) : (
-              <div className="hidden-tile">?</div>
+              <div className="hidden-tile">{index + 1}</div>
             )}
           </div>
         ))}
@@ -137,13 +145,11 @@ function App() {
         </div>
       )}
 
-      {/* Background Music */}
       <audio ref={backgroundMusicRef} loop>
         <source src="/audio/Vordt.MP3" type="audio/mp3" />
         Your browser does not support the audio element.
       </audio>
 
-      {/* You Died Sound */}
       <audio ref={deathSoundRef}>
         <source src="/audio/you-died.MP3" type="audio/mp3" />
         Your browser does not support the audio element.
